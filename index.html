@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小药叮</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #FFF8F0;
+  color: #333;
+  font-size: 20px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+.page { display:none; padding: 20px 16px; }
+.page.active { display:block; }
+
+.header { text-align:center; padding:24px 0 20px; }
+.header h1 { font-size:32px; color:#E8652A; font-weight:700; }
+.header p { font-size:18px; color:#888; margin-top:6px; }
+
+.btn-big {
+  display:block; width:100%; padding:28px 20px; margin-bottom:16px;
+  border:none; border-radius:16px; font-size:26px; font-weight:700; color:#fff;
+  cursor:pointer; text-align:left; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  transition:transform 0.1s;
+}
+.btn-big:active { transform:scale(0.97); }
+.btn-big .sub { display:block; font-size:18px; font-weight:400; margin-top:6px; opacity:0.9; }
+.btn-orange { background:linear-gradient(135deg, #FF8C42, #E8652A); }
+.btn-green  { background:linear-gradient(135deg, #52C41A, #389E0D); }
+.btn-blue   { background:linear-gradient(135deg, #40A9FF, #1890FF); }
+.btn {
+  display:inline-block; padding:14px 28px; border:none; border-radius:12px;
+  font-size:22px; font-weight:600; cursor:pointer; margin:6px;
+}
+.btn-secondary { background:#f0f0f0; color:#333; }
+.btn-success { background:#52C41A; color:#fff; }
+
+.card {
+  background:#fff; border-radius:16px; padding:20px;
+  margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.card-title { font-size:21px; font-weight:700; color:#333; margin-bottom:16px; }
+
+.today-card h2 { font-size:24px; margin-bottom:12px; color:#333; }
+.today-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 0; border-bottom:1px solid #f0f0f0; font-size:22px;
+}
+.today-item:last-child { border-bottom:none; }
+.today-item.done { color:#aaa; text-decoration:line-through; }
+.today-item .time { font-weight:700; color:#E8652A; margin-right:12px; flex-shrink:0; font-size:20px; }
+.today-item.done .time { color:#aaa; }
+.today-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.status-btn {
+  font-size:16px; padding:4px 10px; border-radius:8px; border:none;
+  cursor:pointer; font-weight:600;
+}
+.status-btn.status-pending { background:#FFF2E8; color:#E8652A; }
+.status-btn.status-done { background:#f6ffed; color:#52C41A; }
+.delete-btn {
+  font-size:18px; padding:3px 8px; border-radius:8px; border:none;
+  background:#fff1f0; color:#ff4d4f; cursor:pointer; font-weight:700; line-height:1.2;
+}
+.delete-btn:active { background:#ffccc7; }
+.today-med-text { flex:1; display:flex; align-items:center; overflow:hidden; font-size:22px; font-weight:600; color:#333; }
+.today-med-text .med-name { flex:0 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.today-dose-small { font-size:18px; color:#888; font-weight:400; margin-left:8px; flex-shrink:0; }
+.today-item.done .today-med-text { color:#aaa; }
+.empty-tip { text-align:center; color:#999; font-size:20px; padding:30px 0; }
+
+.form-group { margin-bottom:20px; }
+.form-group:last-child { margin-bottom:0; }
+.form-group label { display:block; font-size:22px; font-weight:600; margin-bottom:8px; color:#333; }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; padding:16px; font-size:22px; border:2px solid #ddd;
+  border-radius:12px; background:#fff; font-family:inherit;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color:#E8652A; outline:none;
+}
+.time-row { display:flex; gap:10px; }
+.time-row input { flex:1; }
+
+.scan-area {
+  background:#fff; border-radius:16px; padding:20px; text-align:center;
+  margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.scan-area img { max-width:100%; border-radius:12px; margin-bottom:12px; }
+.scan-placeholder {
+  border:3px dashed #ddd; border-radius:12px; padding:50px 20px;
+  color:#999; font-size:22px;
+}
+#fileInput { display:none; }
+.scan-tip { text-align:center; color:#999; font-size:17px; margin:8px 0 16px; }
+
+.result-card {
+  background:#fff; border-radius:16px; padding:20px; margin-top:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+.result-card h3 { font-size:26px; color:#E8652A; margin-bottom:12px; }
+.result-card .brand { font-size:18px; color:#888; font-weight:400; }
+.result-row {
+  padding:10px 0; border-bottom:1px solid #f5f5f5; font-size:21px;
+}
+.result-row:last-child { border-bottom:none; }
+.result-label { font-weight:700; color:#333; margin-right:8px; }
+.info-group { border-radius:10px; padding:14px 16px; margin:10px 0; }
+.info-group.basic { background:#f9f9f9; }
+.info-group.usage { background:#f6ffed; }
+.warn-box {
+  background:#FFF2E8; border-left:5px solid #E8652A; padding:14px 16px;
+  border-radius:8px; margin-top:12px; font-size:20px;
+}
+.warn-box.red { background:#fff1f0; border-left-color:#ff4d4f; }
+.warn-box.yellow { background:#fffbe6; border-left-color:#faad14; }
+.warn-box.blue { background:#f0f5ff; border-left-color:#1890ff; }
+.disclaimer { text-align:center; color:#aaa; font-size:15px; margin-top:12px; }
+.result-actions { text-align:center; margin-top:18px; }
+
+.voice-card { text-align:center; padding:24px 20px; }
+.voice-card .vc-title { font-size:21px; font-weight:700; color:#333; margin-bottom:6px; }
+.voice-card .vc-desc { font-size:17px; color:#999; margin-bottom:4px; }
+.voice-card .vc-example { font-size:16px; color:#bbb; margin-bottom:16px; }
+.voice-card .vc-result { font-size:19px; color:#E8652A; margin-top:14px; min-height:28px; }
+
+.drug-confirm {
+  background:#f5f5f5; border-radius:10px; padding:14px 16px; margin-bottom:14px;
+}
+.drug-confirm .dc-label { font-size:17px; color:#999; margin-bottom:4px; }
+.drug-confirm .dc-value { font-size:23px; font-weight:700; color:#333; line-height:1.4; }
+.section-heading { font-size:22px; font-weight:700; margin-bottom:12px; }
+.section-heading.danger { color:#ff4d4f; }
+.conflict-card {
+  border:2px solid #ddd; border-radius:12px; padding:14px 16px;
+  margin-bottom:12px; background:#fff;
+}
+.conflict-card.high { border-color:#ff4d4f; }
+.conflict-card.mid { border-color:#fa8c16; }
+.conflict-card.low { border-color:#faad14; }
+.conflict-card .cc-header { display:flex; align-items:center; margin-bottom:8px; }
+.conflict-card .cc-pair { font-size:20px; font-weight:700; color:#333; flex:1; }
+.risk-tag {
+  color:#fff; font-size:16px; font-weight:700; padding:4px 14px;
+  border-radius:20px; flex-shrink:0;
+}
+.risk-tag.high { background:#ff4d4f; }
+.risk-tag.mid { background:#fa8c16; }
+.risk-tag.low { background:#faad14; }
+.conflict-card .cc-desc { font-size:19px; color:#555; line-height:1.6; }
+.safe-card {
+  background:#f6ffed; border:2px solid #52C41A; border-radius:12px;
+  padding:18px; text-align:center; margin-bottom:12px;
+}
+.safe-card .sc-title { font-size:23px; font-weight:700; color:#52C41A; }
+.safe-card .sc-desc { font-size:18px; color:#666; margin-top:8px; }
+.info-box { border-radius:8px; padding:14px 16px; margin-top:12px; }
+.info-box.blue { background:#f0f5ff; border-left:5px solid #1890ff; }
+.info-box.yellow { background:#fffbe6; border-left:5px solid #faad14; }
+.info-box .ib-title { font-size:19px; font-weight:700; }
+.info-box.blue .ib-title { color:#1890ff; }
+.info-box.yellow .ib-title { color:#d48806; }
+.info-box .ib-content { font-size:19px; color:#333; line-height:1.6; }
+
+.top-bar { display:flex; align-items:center; padding:16px 0; margin-bottom:10px; }
+.top-bar .back-btn {
+  font-size:22px; color:#E8652A; background:none; border:none;
+  cursor:pointer; font-weight:600;
+}
+.top-bar .title {
+  flex:1; text-align:center; font-size:26px; font-weight:700;
+  color:#333; margin-right:50px;
+}
+
+.loading { text-align:center; padding:30px; font-size:22px; color:#888; }
+.loading .spin {
+  display:inline-block; width:30px; height:30px; border:4px solid #f0f0f0;
+  border-top-color:#E8652A; border-radius:50%; animation:spin 1s linear infinite;
+  margin-right:10px; vertical-align:middle;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.voice-btn {
+  width:80px; height:80px; border-radius:50%; background:#E8652A; color:#fff;
+  border:none; font-size:16px; font-weight:700; cursor:pointer; margin:10px auto;
+  display:block; user-select:none; -webkit-user-select:none; touch-action:manipulation;
+}
+.voice-btn.lg { width:90px; height:90px; font-size:18px; }
+.voice-btn.recording { background:#ff4d4f; animation:pulse 1s infinite; }
+@keyframes pulse {
+  0%,100% { transform:scale(1); }
+  50% { transform:scale(1.1); }
+}
+.voice-tip { text-align:center; font-size:18px; color:#888; margin-top:8px; }
+
+.reminder-overlay {
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.7); z-index:999; justify-content:center;
+  align-items:center; padding:20px;
+}
+.reminder-overlay.show { display:flex; }
+.reminder-box {
+  background:#fff; border-radius:20px; padding:30px 24px; width:100%;
+  max-width:400px; text-align:center;
+}
+.reminder-box .bell { font-size:60px; margin-bottom:10px; }
+.reminder-box h2 { font-size:30px; color:#E8652A; margin-bottom:8px; }
+.reminder-box .med-name { font-size:28px; font-weight:700; margin:16px 0; color:#333; }
+.reminder-box .med-dose { font-size:22px; color:#666; margin-bottom:24px; }
+.reminder-box .btn-big { text-align:center; padding:24px; }
+</style>
+</head>
+<body>
+
+<div id="page-home" class="page active">
+  <div class="header">
+    <h1>小药叮</h1>
+    <p>您的贴心用药助手</p>
+  </div>
+  <div class="card today-card">
+    <h2>今日服药</h2>
+    <div id="todayList"></div>
+  </div>
+  <button class="btn-big btn-orange" onclick="showPage('scan')">
+    拍照识药<span class="sub">拍药盒，告诉您怎么吃</span>
+  </button>
+  <button class="btn-big btn-green" onclick="showPage('add')">
+    设提醒<span class="sub">添加服药时间提醒</span>
+  </button>
+  <button class="btn-big btn-blue" onclick="showPage('interaction')">
+    联用禁忌<span class="sub">多种药一起吃，查有没有冲突</span>
+  </button>
+</div>
+
+<div id="page-scan" class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <span class="title">拍照识药</span>
+  </div>
+  <div class="scan-area">
+    <div id="scanPlaceholder" class="scan-placeholder">点击下方按钮<br>拍摄或上传药盒照片</div>
+    <img id="scanPreview" style="display:none;" alt="药盒照片">
+  </div>
+  <input type="file" id="fileInput" accept="image/*" onchange="handleScan(event)">
+  <button class="btn-big btn-orange" onclick="speak('正在识别药品，请稍候'); document.getElementById('fileInput').click()">
+    拍照 / 选图
+  </button>
+  <p class="scan-tip">💡 拍药盒正面即可，系统自动补全用法用量和注意事项</p>
+  <div id="scanResult"></div>
+</div>
+
+<div id="page-add" class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <span class="title">设提醒</span>
+  </div>
+  <div class="card voice-card">
+    <div class="vc-title">🎤 语音填写</div>
+    <p class="vc-desc">按住按钮说话，自动填好药品信息</p>
+    <p class="vc-example">例如：每天早上八点吃阿司匹林一片</p>
+    <button class="voice-btn lg" id="voiceBtn">按住<br>说话</button>
+    <p id="voiceResult" class="vc-result"></p>
+  </div>
+  <div class="card">
+    <div class="card-title">📝 确认信息</div>
+    <div class="form-group">
+      <label>药品</label>
+      <input type="text" id="medName" placeholder="例如：阿司匹林">
+    </div>
+    <div class="form-group">
+      <label>剂量</label>
+      <input type="text" id="medDose" placeholder="例如：1片">
+    </div>
+    <div class="form-group">
+      <label>时间</label>
+      <div class="time-row"><input type="time" id="medTime" value="08:00"></div>
+    </div>
+    <div class="form-group">
+      <label>备注（可选）</label>
+      <input type="text" id="medNote" placeholder="例如：饭后服用">
+    </div>
+  </div>
+  <button class="btn-big btn-green" onclick="savePlan()">保存提醒</button>
+</div>
+
+<div id="page-interaction" class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showPage('home')">← 返回</button>
+    <span class="title">联用禁忌</span>
+  </div>
+  <div class="card voice-card">
+    <div class="vc-title">🎤 语音提问</div>
+    <p class="vc-desc">按住按钮说话，直接问就行</p>
+    <p class="vc-example">例如：阿司匹林和布洛芬可以一起吃吗</p>
+    <button class="voice-btn lg" id="interactionVoiceBtn">按住<br>说话</button>
+    <p id="interactionVoiceResult" class="vc-result"></p>
+  </div>
+  <div class="card">
+    <div class="card-title">📝 或手动输入</div>
+    <div class="form-group">
+      <label>药品名称（逗号隔开）或直接提问</label>
+      <textarea id="interactionInput" rows="3" placeholder=""></textarea>
+    </div>
+  </div>
+  <button class="btn-big btn-blue" onclick="checkInteraction()">检查联用禁忌</button>
+  <div id="interactionResult"></div>
+</div>
+
+<div id="reminderOverlay" class="reminder-overlay">
+  <div class="reminder-box">
+    <div class="bell">⏰</div>
+    <h2>该吃药啦</h2>
+    <div class="med-name" id="reminderName"></div>
+    <div class="med-dose" id="reminderDose"></div>
+    <button class="btn-big btn-success" onclick="confirmTaken()">我已服用</button>
+    <button class="btn btn-secondary" onclick="snoozeReminder()" style="margin-top:12px;">10分钟后再提醒</button>
+  </div>
+</div>
+
+<script>
+const AI_CONFIG = {
+  API_KEY: 'fa50168170174c708c0ee1f810abd65d.KLKJq9Tp33HYVemv',
+  VISION_MODEL: 'glm-4v-plus',
+  TEXT_MODEL: 'glm-4-plus',
+  VOICE_MODEL: 'glm-4-air',
+  API_URL: 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+};
+
+const STORAGE_KEY = 'yinling_plans';
+function loadPlans() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function savePlans(plans) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+  syncPlansToSW();
+}
+function syncPlansToSW() {
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    try { navigator.serviceWorker.controller.postMessage({ type:'sync-plans', plans:loadPlans() }); } catch(e) {}
+  }
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (name === 'home') renderToday();
+  if (name === 'interaction') {
+    document.getElementById('interactionInput').value = '';
+    document.getElementById('interactionResult').innerHTML = '';
+    document.getElementById('interactionVoiceResult').textContent = '';
+    lastInteractionVoiceText = '';
+  }
+  window.scrollTo(0, 0);
+}
+
+function renderToday() {
+  const plans = loadPlans();
+  const today = new Date().toDateString();
+  const list = document.getElementById('todayList');
+  const todayPlans = plans.filter(p => p.time).sort((a, b) => a.time.localeCompare(b.time));
+  if (todayPlans.length === 0) {
+    list.innerHTML = '<div class="empty-tip">还没有服药计划<br>点击下方"设提醒"添加</div>';
+    return;
+  }
+  list.innerHTML = todayPlans.map(p => {
+    const taken = p.takenDates && p.takenDates.includes(today);
+    const doseHtml = p.dose ? `<span class="today-dose-small">${p.dose}</span>` : '';
+    return `<div class="today-item ${taken ? 'done' : ''}">
+      <span class="time">${p.time}</span>
+      <div class="today-med-text">
+        <span class="med-name">${p.name}</span>
+        ${doseHtml}
+      </div>
+      <div class="today-actions">
+        <button class="status-btn ${taken ? 'status-done' : 'status-pending'}" onclick="markTaken(${p.id}, ${taken ? 'false' : 'true'})">${taken ? '已吃' : '待吃'}</button>
+        <button class="delete-btn" onclick="deletePlan(${p.id})">×</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 时间已过的话从明天开始提醒，避免刚设完就弹
+function savePlan() {
+  const name = document.getElementById('medName').value.trim();
+  const dose = normalizeDose(document.getElementById('medDose').value.trim());
+  const time = document.getElementById('medTime').value;
+  const note = document.getElementById('medNote').value.trim();
+  if (!name) { alert('请填写药品名称'); return; }
+  if (!time) { alert('请选择服用时间'); return; }
+  const plans = loadPlans();
+  const now = new Date();
+  const parts = time.split(':');
+  const planTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+  const newPlan = {
+    id: Date.now(), name, dose, time, note,
+    takenDates: [], createdAt: new Date().toISOString()
+  };
+  if (planTime <= now) newPlan.lastReminded = now.toDateString();
+  plans.push(newPlan);
+  savePlans(plans);
+  document.getElementById('medName').value = '';
+  document.getElementById('medDose').value = '';
+  document.getElementById('medNote').value = '';
+  alert('保存成功！');
+  showPage('home');
+}
+
+function markTaken(id, taken = true) {
+  const plans = loadPlans();
+  const p = plans.find(x => x.id === id);
+  if (!p) return;
+  const today = new Date().toDateString();
+  p.takenDates = p.takenDates || [];
+  if (taken) {
+    if (!p.takenDates.includes(today)) p.takenDates.push(today);
+  } else {
+    p.takenDates = p.takenDates.filter(d => d !== today);
+  }
+  savePlans(plans);
+  renderToday();
+}
+function deletePlan(id) {
+  if (!confirm('确定删除这个提醒吗？')) return;
+  savePlans(loadPlans().filter(p => p.id !== id));
+  renderToday();
+}
+
+function handleScan(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById('scanPreview');
+  const placeholder = document.getElementById('scanPlaceholder');
+  const resultDiv = document.getElementById('scanResult');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    if (!AI_CONFIG.API_KEY || AI_CONFIG.API_KEY.indexOf('你的') !== -1) {
+      resultDiv.innerHTML = '<div class="warn-box">尚未配置大模型API密钥。<br><br>请在HTML代码中找到 AI_CONFIG，填入你的 API_KEY 后重新部署。</div>';
+      return;
+    }
+    recognizeMedication(e.target.result, resultDiv);
+  };
+  reader.readAsDataURL(file);
+}
+
+// 模型返回的JSON可能带markdown或多余文字，做容错
+function parseJSONSafe(content) {
+  try { return JSON.parse(content); } catch(e) {}
+  const m = content.match(/\{[\s\S]*\}/);
+  if (m) { try { return JSON.parse(m[0]); } catch(e) {} }
+  return null;
+}
+
+function formatField(text) {
+  if (!text) return '';
+  if (typeof text !== 'string') {
+    try { text = Array.isArray(text) ? text.join('；') : JSON.stringify(text); } catch(e) { text = String(text); }
+  }
+  return text;
+}
+
+async function recognizeMedication(imageData, resultDiv) {
+  resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在识别药品并整理用药说明，请稍候...</div>';
+  const prompt = '识别这张药品照片，告诉我药名和怎么吃。返回JSON，字段有name(通用名)、brand(商品名)、dose(规格)、indication(适应症)、usage(用法用量)、timing(什么时候吃)、adverse(不良反应)、contraindication(什么人不能吃)、caution(注意事项)、interaction(联用提醒)。只返回JSON别写别的。认不出来name就写"未能识别出药品"。图片上看不清的信息按这个药的常规说明补全就行，用大白话写。';
+  try {
+    const res = await fetch(AI_CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
+      body: JSON.stringify({
+        model: AI_CONFIG.VISION_MODEL,
+        messages: [{ role:'user', content:[
+          { type:'image_url', image_url:{ url:imageData } },
+          { type:'text', text:prompt }
+        ]}],
+        max_tokens: 2048, temperature: 0.3
+      })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('API错误 ' + res.status + '：' + errText.substring(0, 300));
+    }
+    const data = await res.json();
+    const result = parseJSONSafe(data.choices[0].message.content);
+    if (!result || !result.name) {
+      resultDiv.innerHTML = '<div class="warn-box">识别结果解析失败。<br><br>模型返回内容：' + data.choices[0].message.content.substring(0, 200) + '</div>';
+      return;
+    }
+    if (result.name.indexOf('未能识别') !== -1) {
+      resultDiv.innerHTML = '<div class="result-card"><div class="warn-box">未能识别出药品信息。<br><br>请确保照片清晰、药盒文字完整可见，然后重新拍摄。</div></div>';
+      speak('未能识别出药品，请重新拍摄');
+      return;
+    }
+    showRecognizeResult(result);
+  } catch (err) {
+    resultDiv.innerHTML = '<div class="warn-box">识别失败：' + err.message + '<br><br>请检查网络是否正常，或稍后再试。</div>';
+    speak('识别失败，请稍后再试');
+  }
+}
+
+let lastRecognizedMed = null;
+function showRecognizeResult(med) {
+  lastRecognizedMed = med;
+  const resultDiv = document.getElementById('scanResult');
+  const name = med.name || '未能识别出药品';
+  const isFailed = name.indexOf('未能识别') !== -1 || name.indexOf('未识别') !== -1;
+  let html = '<div class="result-card">';
+  html += '<h3>' + name;
+  if (med.brand) html += ' <span class="brand">（' + med.brand + '）</span>';
+  html += '</h3>';
+  if (!isFailed) {
+    html += '<div class="info-group basic">';
+    if (med.dose) html += '<div class="result-row" style="border-bottom:1px solid #eee;"><span class="result-label">规格：</span>' + formatField(med.dose) + '</div>';
+    if (med.indication) html += '<div class="result-row"><span class="result-label">适应症：</span>' + formatField(med.indication) + '</div>';
+    html += '</div>';
+    html += '<div class="info-group usage">';
+    if (med.usage) html += '<div class="result-row" style="border-bottom:1px solid #eee;"><span class="result-label">怎么吃：</span>' + formatField(med.usage) + '</div>';
+    if (med.timing) html += '<div class="result-row"><span class="result-label">什么时候吃：</span>' + formatField(med.timing) + '</div>';
+    html += '</div>';
+    if (med.contraindication) html += '<div class="warn-box red"><strong>⚠️ 禁忌人群：</strong><br>' + formatField(med.contraindication) + '</div>';
+    if (med.adverse) html += '<div class="warn-box yellow"><strong>常见不良反应：</strong><br>' + formatField(med.adverse) + '</div>';
+    if (med.caution) html += '<div class="warn-box"><strong>注意事项：</strong><br>' + formatField(med.caution) + '</div>';
+    if (med.interaction && med.interaction.indexOf('无特殊') === -1) {
+      html += '<div class="warn-box blue"><strong>联用提醒：</strong><br>' + formatField(med.interaction) + '</div>';
+    }
+    html += '<div class="result-actions"><button class="btn btn-secondary" onclick="speakResult()">🔊 重新播报</button></div>';
+    html += '<p class="disclaimer">以上信息仅供参考，具体请以药品说明书或医嘱为准</p>';
+  } else {
+    html += '<div class="warn-box">未能识别出药品信息。<br><br>请确保照片清晰、药盒文字完整可见，然后重新拍摄。</div>';
+  }
+  html += '</div>';
+  resultDiv.innerHTML = html;
+  if (!isFailed) speakResult();
+  else speak('未能识别出药品，请重新拍摄');
+}
+
+function speakResult() {
+  if (!lastRecognizedMed) return;
+  const med = lastRecognizedMed;
+  let text = '识别完成。' + med.name;
+  if (med.indication) text += '，用于' + med.indication;
+  if (med.usage) text += '。用法用量：' + med.usage;
+  if (med.timing) text += '，建议' + med.timing;
+  if (med.contraindication) text += '。注意：' + med.contraindication + '禁用';
+  speak(text);
+}
+
+async function checkInteraction() {
+  let input = document.getElementById('interactionInput').value.trim();
+  const resultDiv = document.getElementById('interactionResult');
+  if (!input && lastInteractionVoiceText) input = lastInteractionVoiceText.trim();
+  if (!input) { alert('请输入药品名称或按住说话'); return; }
+  resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在分析联用禁忌，请稍候...</div>';
+  const prompt = '用户输入：' + input + '\n\n先把里面的药名提取出来，再看看这些药一起吃有没有冲突。返回JSON：extractedDrugs(药名逗号分隔)、hasConflict(true/false)、conflicts(数组，每项pair/risk(高中低)/description)、warnings、suggestion。只返回JSON。warnings和suggestion里要写具体药名别用"这些药"。认不出药名extractedDrugs就留空，只有一种药也说明一下。';
+  try {
+    const res = await fetch(AI_CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
+      body: JSON.stringify({ model: AI_CONFIG.TEXT_MODEL, messages:[{ role:'user', content:prompt }], max_tokens:1200, temperature:0.3 })
+    });
+    if (!res.ok) throw new Error('API错误 ' + res.status);
+    const data = await res.json();
+    const result = parseJSONSafe(data.choices[0].message.content);
+    if (!result) throw new Error('解析失败');
+    const drugs = (result.extractedDrugs || '').trim();
+    const drugList = drugs ? drugs.split(/[,，、\s]+/).filter(Boolean) : [];
+    if (!drugs || drugList.length === 0) {
+      resultDiv.innerHTML = '<div class="result-card">' +
+        '<h3 style="color:#fa8c16;">⚠️ 未能识别药品</h3>' +
+        '<div class="result-row">没有从您的输入中识别出药品名称。</div>' +
+        '<div class="warn-box" style="margin-top:10px;"><strong>请重新输入：</strong><br>' +
+        '1. 直接输入药品名称，用逗号隔开，例如：阿司匹林,布洛芬<br>' +
+        '2. 或用自然语言提问，例如：阿司匹林和布洛芬可以一起吃吗<br>' +
+        '3. 也可以按住下方语音按钮，直接说出药品名称</div></div>';
+      speak('未能识别出药品名称，请重新输入药品名称，用逗号隔开');
+      return;
+    }
+    if (drugList.length < 2) {
+      resultDiv.innerHTML = '<div class="result-card">' +
+        '<h3 style="color:#fa8c16;">⚠️ 药品数量不足</h3>' +
+        '<div class="result-row">只识别到：<strong>' + drugs + '</strong></div>' +
+        '<div class="warn-box" style="margin-top:10px;"><strong>联用禁忌分析需要至少两种药品。</strong><br>' +
+        '请补充其他药品名称，例如：' + drugs + ',阿莫西林<br>' +
+        '或按住下方语音按钮，直接说出要一起吃的几种药</div></div>';
+      speak('只识别到' + drugs + '一种药，联用禁忌分析需要至少两种药品，请补充其他药品名称');
+      return;
+    }
+    document.getElementById('interactionInput').value = drugs;
+    const sortedConflicts = (result.conflicts || []).slice().sort((a, b) => {
+      const order = { '高':0, '中':1, '低':2 };
+      return (order[a.risk] || 3) - (order[b.risk] || 3);
+    });
+    let html = '<div class="result-card">';
+    html += '<div class="drug-confirm"><div class="dc-label">分析药品</div><div class="dc-value">' + drugs + '</div></div>';
+    if (result.hasConflict && sortedConflicts.length > 0) {
+      html += '<div class="section-heading danger">⚠️ 发现联用禁忌</div>';
+      for (const c of sortedConflicts) {
+        const riskClass = c.risk === '高' ? 'high' : (c.risk === '中' ? 'mid' : 'low');
+        html += '<div class="conflict-card ' + riskClass + '">' +
+          '<div class="cc-header"><span class="cc-pair">' + c.pair + '</span>' +
+          '<span class="risk-tag ' + riskClass + '">' + c.risk + '风险</span></div>' +
+          '<div class="cc-desc">' + c.description + '</div></div>';
+      }
+    } else {
+      html += '<div class="safe-card"><div class="sc-title">✅ 未发现明显联用禁忌</div>' +
+        '<div class="sc-desc">' + drugs + ' 之间没有已知的严重相互作用</div></div>';
+    }
+    if (result.warnings) {
+      html += '<div class="info-box blue"><div class="ib-title">注意事项</div><div class="ib-content">' + result.warnings + '</div></div>';
+    }
+    if (result.suggestion) {
+      html += '<div class="info-box yellow"><div class="ib-title">建议</div><div class="ib-content">' + result.suggestion + '</div></div>';
+    }
+    html += '<div class="result-actions"><button class="btn btn-secondary" style="font-size:20px;padding:16px 36px;" onclick="speakInteractionResult()">🔊 重新播报</button></div>';
+    html += '</div>';
+    resultDiv.innerHTML = html;
+    lastInteractionResult = result;
+    speakInteractionResult();
+  } catch (e) {
+    resultDiv.innerHTML = '<div class="warn-box">分析失败：' + e.message + '<br><br>请检查网络是否正常。</div>';
+  }
+}
+
+let lastInteractionResult = null;
+function speakInteractionResult() {
+  if (!lastInteractionResult) return;
+  const r = lastInteractionResult;
+  const drugs = (r.extractedDrugs || '').trim();
+  const sortedConflicts = (r.conflicts || []).slice().sort((a, b) => {
+    const order = { '高':0, '中':1, '低':2 };
+    return (order[a.risk] || 3) - (order[b.risk] || 3);
+  });
+  let text = '联用禁忌分析完成。分析药品：' + drugs + '。';
+  if (r.hasConflict && sortedConflicts.length > 0) {
+    text += '发现' + sortedConflicts.length + '处联用禁忌，按风险从高到低播报。';
+    for (let i = 0; i < Math.min(sortedConflicts.length, 2); i++) {
+      const c = sortedConflicts[i];
+      text += c.pair + '，' + c.risk + '风险。' + c.description + '。';
+    }
+    if (sortedConflicts.length > 2) text += '其余' + (sortedConflicts.length - 2) + '处禁忌请查看屏幕。';
+  } else {
+    text += '这几种药之间没有发现明显的联用禁忌，但仍建议遵医嘱服用。';
+  }
+  if (r.suggestion) text += '建议：' + r.suggestion;
+  speak(text);
+}
+
+let interactionRecognition = null;
+let interactionRecording = false;
+let lastInteractionVoiceText = '';
+function initInteractionVoice() {
+  const btn = document.getElementById('interactionVoiceBtn');
+  if (!btn) return;
+  btn.addEventListener('mousedown', function(e) { e.preventDefault(); startInteractionVoice(); });
+  btn.addEventListener('touchstart', function(e) { e.preventDefault(); startInteractionVoice(); }, { passive:false });
+  btn.addEventListener('mouseup', function(e) { e.preventDefault(); stopInteractionVoice(); });
+  btn.addEventListener('mouseleave', stopInteractionVoice);
+  btn.addEventListener('touchend', function(e) { e.preventDefault(); stopInteractionVoice(); }, { passive:false });
+  btn.addEventListener('touchcancel', stopInteractionVoice);
+}
+// 开始说话时清掉上次的输入和结果
+function startInteractionVoice() {
+  const btn = document.getElementById('interactionVoiceBtn');
+  const resultEl = document.getElementById('interactionVoiceResult');
+  if (interactionRecording) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { resultEl.textContent = '当前浏览器不支持语音识别，请用Chrome或Safari'; return; }
+  try { interactionRecognition = new SR(); } catch(e) { return; }
+  interactionRecognition.lang = 'zh-CN';
+  interactionRecognition.interimResults = true;
+  interactionRecognition.continuous = false;
+  interactionRecognition.onstart = function() {
+    interactionRecording = true;
+    btn.classList.add('recording');
+    btn.innerHTML = '正在<br>听...';
+    resultEl.textContent = '请说话...';
+    document.getElementById('interactionInput').value = '';
+    document.getElementById('interactionResult').innerHTML = '';
+    lastInteractionVoiceText = '';
+  };
+  interactionRecognition.onresult = function(event) {
+    let text = '';
+    for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+    text = text.trim();
+    if (text) {
+      resultEl.textContent = '您说：' + text;
+      lastInteractionVoiceText = text;
+      document.getElementById('interactionInput').value = text;
+    }
+  };
+  interactionRecognition.onerror = function(event) {
+    interactionRecording = false;
+    btn.classList.remove('recording');
+    btn.innerHTML = '按住<br>说话';
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') resultEl.textContent = '麦克风权限被拒绝，请在浏览器设置中允许';
+    else if (event.error === 'no-speech') resultEl.textContent = '没有听到声音，请大声再说一次';
+    else if (event.error === 'network') resultEl.textContent = '网络异常，语音识别需要联网';
+    else if (event.error === 'aborted') return;
+    else resultEl.textContent = '识别出错，请重试';
+  };
+  interactionRecognition.onend = function() {
+    interactionRecording = false;
+    btn.classList.remove('recording');
+    btn.innerHTML = '按住<br>说话';
+  };
+  try { interactionRecognition.start(); } catch(e) {}
+}
+function stopInteractionVoice() {
+  if (!interactionRecording || !interactionRecognition) return;
+  try { interactionRecognition.stop(); } catch(e) {}
+}
+
+let currentReminderId = null;
+let reminderTimer = null;
+const originalTitle = '小药叮';
+let titleFlashTimer = null;
+function startTitleFlash() {
+  if (titleFlashTimer) return;
+  let flag = false;
+  titleFlashTimer = setInterval(function() {
+    document.title = flag ? '⏰该吃药了' : originalTitle;
+    flag = !flag;
+  }, 1000);
+}
+function stopTitleFlash() {
+  if (titleFlashTimer) { clearInterval(titleFlashTimer); titleFlashTimer = null; }
+  document.title = originalTitle;
+}
+function checkReminders() {
+  const now = new Date();
+  const today = now.toDateString();
+  const plans = loadPlans();
+  for (const p of plans) {
+    const parts = p.time.split(':');
+    const planTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+    if (planTime <= now) {
+      const alreadyTaken = p.takenDates && p.takenDates.includes(today);
+      const alreadyReminded = p.lastReminded === today;
+      if (!alreadyTaken && !alreadyReminded) {
+        p.lastReminded = today;
+        savePlans(plans);
+        showReminder(p);
+        return;
+      }
+    }
+  }
+}
+// 校准到整分钟，避免误差累积
+function scheduleNextCheck() {
+  const now = new Date();
+  const nextMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1, 0, 0);
+  const delay = nextMinute - now;
+  reminderTimer = setTimeout(function() { checkReminders(); scheduleNextCheck(); }, delay);
+}
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) { checkReminders(); syncPlansToSW(); }
+});
+window.addEventListener('focus', function() { checkReminders(); syncPlansToSW(); });
+window.addEventListener('pageshow', function() { checkReminders(); syncPlansToSW(); });
+window.addEventListener('online', function() { checkReminders(); });
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+const SW_CODE = `
+let medicationPlans = [];
+let checkTimer = null;
+let pageUrl = './';
+self.addEventListener('install', e => { self.skipWaiting(); });
+self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+self.addEventListener('message', e => {
+  const data = e.data;
+  if (e.source && e.source.url) pageUrl = e.source.url;
+  if (data.type === 'sync-plans') { medicationPlans = data.plans || []; scheduleNextCheck(); }
+});
+function scheduleNextCheck() {
+  if (checkTimer) clearTimeout(checkTimer);
+  const now = new Date();
+  const nextMinute = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1, 0, 0);
+  const delay = Math.max(nextMinute - now, 1000);
+  checkTimer = setTimeout(() => { checkReminders(); scheduleNextCheck(); }, delay);
+}
+function checkReminders() {
+  const now = new Date();
+  const today = now.toDateString();
+  let changed = false;
+  for (const p of medicationPlans) {
+    if (!p.time) continue;
+    const parts = p.time.split(':');
+    const planTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+    if (planTime <= now) {
+      const alreadyTaken = p.takenDates && p.takenDates.includes(today);
+      const alreadyReminded = p.lastReminded === today;
+      if (!alreadyTaken && !alreadyReminded) {
+        p.lastReminded = today;
+        changed = true;
+        showMedicationNotification(p);
+        break;
+      }
+    }
+  }
+  if (changed) {
+    self.clients.matchAll({ type:'window', includeUncontrolled:true }).then(clients => {
+      clients.forEach(c => c.postMessage({ type:'sync-plans', plans:medicationPlans }));
+    });
+  }
+}
+function showMedicationNotification(plan) {
+  const title = '⏰ 小药叮 - 该吃药啦';
+  const body = plan.name + (plan.dose ? ' ' + plan.dose : '') + (plan.note ? '（' + plan.note + '）' : '');
+  const icon = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="80">💊</text></svg>');
+  self.registration.showNotification(title, {
+    body:body, icon:icon, badge:icon,
+    tag:'medication-' + plan.id, requireInteraction:true, silent:false,
+    data:{ planId:plan.id, planName:plan.name }
+  });
+}
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const data = e.notification.data;
+  e.waitUntil(
+    self.clients.matchAll({ type:'window', includeUncontrolled:true }).then(clients => {
+      if (clients.length > 0) {
+        clients[0].focus();
+        clients[0].postMessage({ type:'notification-click', planId:data.planId });
+      } else {
+        return self.clients.openWindow(pageUrl);
+      }
+    })
+  );
+});
+scheduleNextCheck();
+`;
+if ('serviceWorker' in navigator) {
+  try {
+    const swBlob = new Blob([SW_CODE], { type:'application/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).then(function(reg) {
+      if (navigator.serviceWorker.controller) syncPlansToSW();
+      navigator.serviceWorker.addEventListener('controllerchange', function() { syncPlansToSW(); });
+    }).catch(function(err) {
+      console.warn('Service Worker 注册失败（本地文件打开时不支持，需通过服务器访问）:', err);
+    });
+  } catch(e) {
+    console.warn('Service Worker 初始化失败:', e);
+  }
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    const data = event.data;
+    if (data.type === 'sync-plans') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.plans));
+      renderToday();
+    } else if (data.type === 'notification-click') {
+      markTaken(data.planId, true);
+    }
+  });
+}
+
+function showReminder(plan) {
+  currentReminderId = plan.id;
+  document.getElementById('reminderName').textContent = plan.name;
+  document.getElementById('reminderDose').textContent = (plan.dose || '请按医嘱服用') + (plan.note ? '（' + plan.note + '）' : '');
+  document.getElementById('reminderOverlay').classList.add('show');
+  speak('该吃药了。' + plan.name + '，' + (plan.dose || ''));
+  playAlarm();
+  vibratePhone();
+  startTitleFlash();
+  if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification('小药叮 - 该吃药啦', {
+        body: plan.name + ' ' + (plan.dose || '') + (plan.note ? '（' + plan.note + '）' : ''),
+        tag: 'medication-' + plan.id, requireInteraction: true
+      });
+    } catch(e) {}
+  }
+}
+function confirmTaken() {
+  if (currentReminderId) markTaken(currentReminderId, true);
+  document.getElementById('reminderOverlay').classList.remove('show');
+  currentReminderId = null;
+  stopTitleFlash();
+  renderToday();
+}
+function snoozeReminder() {
+  document.getElementById('reminderOverlay').classList.remove('show');
+  stopTitleFlash();
+  if (currentReminderId) {
+    const id = currentReminderId;
+    setTimeout(function() {
+      const plans = loadPlans();
+      const p = plans.find(x => x.id === id);
+      if (p) {
+        const today = new Date().toDateString();
+        if (!p.takenDates || !p.takenDates.includes(today)) showReminder(p);
+      }
+    }, 10 * 60 * 1000);
+  }
+  currentReminderId = null;
+}
+scheduleNextCheck();
+
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+}
+document.addEventListener('click', initAudio, { once:true });
+document.addEventListener('touchstart', initAudio, { once:true });
+function playAlarm() {
+  if (!audioCtx) initAudio();
+  if (!audioCtx) return;
+  try {
+    for (let i = 0; i < 3; i++) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      const t = audioCtx.currentTime + i * 0.45;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.6, t + 0.05);
+      gain.gain.linearRampToValueAtTime(0, t + 0.35);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    }
+  } catch(e) {}
+}
+function vibratePhone() {
+  if (navigator.vibrate) {
+    try { navigator.vibrate([300, 150, 300, 150, 300, 150, 300]); } catch(e) {}
+  }
+}
+
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'zh-CN';
+    utter.rate = 0.9;
+    utter.volume = 1;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+let recognition = null;
+let isRecording = false;
+function initVoiceBtn() {
+  const btn = document.getElementById('voiceBtn');
+  if (!btn) return;
+  btn.addEventListener('mousedown', function(e) { e.preventDefault(); startVoice(); });
+  btn.addEventListener('touchstart', function(e) { e.preventDefault(); startVoice(); }, { passive:false });
+  btn.addEventListener('mouseup', function(e) { e.preventDefault(); stopVoice(); });
+  btn.addEventListener('mouseleave', stopVoice);
+  btn.addEventListener('touchend', function(e) { e.preventDefault(); stopVoice(); }, { passive:false });
+  btn.addEventListener('touchcancel', stopVoice);
+}
+function startVoice() {
+  const btn = document.getElementById('voiceBtn');
+  const resultEl = document.getElementById('voiceResult');
+  let lastVoiceText = '';
+  let voiceParsed = false;
+  if (isRecording) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    resultEl.textContent = '当前浏览器不支持语音识别，请用Safari或Chrome打开';
+    resultEl.style.color = '#999';
+    return;
+  }
+  try { recognition = new SR(); } catch (e) {
+    resultEl.textContent = '语音识别启动失败，请重试';
+    return;
+  }
+  recognition.lang = 'zh-CN';
+  recognition.interimResults = true;
+  recognition.continuous = true;
+  recognition.onstart = function() {
+    isRecording = true;
+    btn.classList.add('recording');
+    btn.innerHTML = '正在<br>听...';
+    resultEl.style.color = '#E8652A';
+    resultEl.textContent = '请说话...';
+  };
+  recognition.onresult = function(event) {
+    let finalText = '', interimText = '';
+    for (let i = 0; i < event.results.length; i++) {
+      if (event.results[i].isFinal) finalText += event.results[i][0].transcript;
+      else interimText += event.results[i][0].transcript;
+    }
+    const full = (finalText + interimText).trim();
+    if (full) {
+      resultEl.textContent = '您说：' + full;
+      lastVoiceText = full;
+    }
+  };
+  recognition.onerror = function(event) {
+    isRecording = false;
+    btn.classList.remove('recording');
+    btn.innerHTML = '按住<br>说话';
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') resultEl.textContent = '麦克风没开，去浏览器设置里允许一下';
+    else if (event.error === 'no-speech') resultEl.textContent = '没听清，再说一次';
+    else resultEl.textContent = '识别失败，重试一下';
+  };
+  recognition.onend = function() {
+    isRecording = false;
+    btn.classList.remove('recording');
+    btn.innerHTML = '按住<br>说话';
+    if (lastVoiceText && !voiceParsed) { voiceParsed = true; parseVoiceCommand(lastVoiceText); }
+  };
+  try { recognition.start(); } catch (e) { resultEl.textContent = '启动失败，请重试'; }
+}
+function stopVoice() {
+  if (!isRecording || !recognition) return;
+  // 延迟300ms再停止，让识别器返回最后的结果（避免剂量等尾部文字丢失）
+  setTimeout(function() {
+    try { recognition.stop(); } catch (e) {}
+  }, 300);
+}
+// 剂量标准化：中文数字转阿拉伯数字，统一显示格式
+function normalizeDose(dose) {
+  if (!dose) return '';
+  let result = String(dose).trim();
+  const map = { '一':'1', '二':'2', '两':'2', '三':'3', '四':'4', '五':'5', '六':'6', '七':'7', '八':'8', '九':'9' };
+  // 十二、十五 → 12、15
+  result = result.replace(/十([一二三四五六七八九])/g, function(m, c) { return '1' + (map[c] || c); });
+  // 二十、二十五 → 20、25
+  result = result.replace(/([一二三四五六七八九])十([一二三四五六七八九])?/g, function(m, a, b) { return (map[a] || a) + (b ? (map[b] || b) : '0'); });
+  // 单独的"十" → 10
+  result = result.replace(/十/g, '10');
+  // 剩余单个中文数字
+  for (const k in map) result = result.replace(new RegExp(k, 'g'), map[k]);
+  return result;
+}
+
+async function parseVoiceCommand(text) {
+  const resultEl = document.getElementById('voiceResult');
+  resultEl.textContent = '您说：' + text + '（正在解析...）';
+  const prompt = '从这句话里提取用药提醒：' + text + '\n\n严格返回JSON，字段如下：\n- name: 药品名称（必须提取）\n- dose: 剂量/数量，如"1片"、"2粒"、"10mg"、"一片"、"两片"（用户说了数量或剂量就必须提取，不要留空）\n- time: 服用时间，HH:MM格式（早上8点=08:00，中午12点=12:00，下午2点=14:00，晚上8点=20:00）\n- note: 备注，如"饭前"、"饭后"、"睡前"、"随餐"（没有就留空）\n\n只返回JSON，不要其他文字。';
+  try {
+    const res = await fetch(AI_CONFIG.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
+      body: JSON.stringify({ model: AI_CONFIG.VOICE_MODEL, messages:[{ role:'user', content:prompt }], max_tokens:300, temperature:0.1 })
+    });
+    if (!res.ok) throw new Error('API错误 ' + res.status);
+    const data = await res.json();
+    const result = parseJSONSafe(data.choices[0].message.content);
+    if (result) {
+      document.getElementById('medName').value = result.name || '';
+      document.getElementById('medDose').value = normalizeDose(result.dose);
+      document.getElementById('medTime').value = result.time || '';
+      document.getElementById('medNote').value = result.note || '';
+      resultEl.textContent = '您说：' + text + '（已解析）';
+    }
+  } catch (e) {
+    console.warn('大模型解析失败:', e);
+    resultEl.textContent = '您说：' + text + '（解析失败：' + e.message + '）';
+  }
+}
+
+initInteractionVoice();
+initVoiceBtn();
+renderToday();
+</script>
+</body>
+</html>
