@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -17,11 +17,9 @@ body {
 }
 .page { display:none; padding: 20px 16px; }
 .page.active { display:block; }
-
 .header { text-align:center; padding:24px 0 20px; }
 .header h1 { font-size:32px; color:#E8652A; font-weight:700; }
 .header p { font-size:18px; color:#888; margin-top:6px; }
-
 .btn-big {
   display:block; width:100%; padding:28px 20px; margin-bottom:16px;
   border:none; border-radius:16px; font-size:26px; font-weight:700; color:#fff;
@@ -39,13 +37,11 @@ body {
 }
 .btn-secondary { background:#f0f0f0; color:#333; }
 .btn-success { background:#52C41A; color:#fff; }
-
 .card {
   background:#fff; border-radius:16px; padding:20px;
   margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 .card-title { font-size:21px; font-weight:700; color:#333; margin-bottom:16px; }
-
 .today-card h2 { font-size:24px; margin-bottom:12px; color:#333; }
 .today-item {
   display:flex; justify-content:space-between; align-items:center;
@@ -72,7 +68,6 @@ body {
 .today-dose-small { font-size:18px; color:#888; font-weight:400; margin-left:8px; flex-shrink:0; }
 .today-item.done .today-med-text { color:#aaa; }
 .empty-tip { text-align:center; color:#999; font-size:20px; padding:30px 0; }
-
 .form-group { margin-bottom:20px; }
 .form-group:last-child { margin-bottom:0; }
 .form-group label { display:block; font-size:22px; font-weight:600; margin-bottom:8px; color:#333; }
@@ -85,7 +80,6 @@ body {
 }
 .time-row { display:flex; gap:10px; }
 .time-row input { flex:1; }
-
 .scan-area {
   background:#fff; border-radius:16px; padding:20px; text-align:center;
   margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.06);
@@ -97,7 +91,6 @@ body {
 }
 #fileInput { display:none; }
 .scan-tip { text-align:center; color:#999; font-size:17px; margin:8px 0 16px; }
-
 .result-card {
   background:#fff; border-radius:16px; padding:20px; margin-top:16px;
   box-shadow:0 2px 8px rgba(0,0,0,0.06);
@@ -121,13 +114,11 @@ body {
 .warn-box.blue { background:#f0f5ff; border-left-color:#1890ff; }
 .disclaimer { text-align:center; color:#aaa; font-size:15px; margin-top:12px; }
 .result-actions { text-align:center; margin-top:18px; }
-
 .voice-card { text-align:center; padding:24px 20px; }
 .voice-card .vc-title { font-size:21px; font-weight:700; color:#333; margin-bottom:6px; }
 .voice-card .vc-desc { font-size:17px; color:#999; margin-bottom:4px; }
 .voice-card .vc-example { font-size:16px; color:#bbb; margin-bottom:16px; }
 .voice-card .vc-result { font-size:19px; color:#E8652A; margin-top:14px; min-height:28px; }
-
 .drug-confirm {
   background:#f5f5f5; border-radius:10px; padding:14px 16px; margin-bottom:14px;
 }
@@ -165,7 +156,6 @@ body {
 .info-box.blue .ib-title { color:#1890ff; }
 .info-box.yellow .ib-title { color:#d48806; }
 .info-box .ib-content { font-size:19px; color:#333; line-height:1.6; }
-
 .top-bar { display:flex; align-items:center; padding:16px 0; margin-bottom:10px; }
 .top-bar .back-btn {
   font-size:22px; color:#E8652A; background:none; border:none;
@@ -175,7 +165,6 @@ body {
   flex:1; text-align:center; font-size:26px; font-weight:700;
   color:#333; margin-right:50px;
 }
-
 .loading { text-align:center; padding:30px; font-size:22px; color:#888; }
 .loading .spin {
   display:inline-block; width:30px; height:30px; border:4px solid #f0f0f0;
@@ -183,7 +172,6 @@ body {
   margin-right:10px; vertical-align:middle;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
-
 .voice-btn {
   width:80px; height:80px; border-radius:50%; background:#E8652A; color:#fff;
   border:none; font-size:16px; font-weight:700; cursor:pointer; margin:10px auto;
@@ -196,7 +184,6 @@ body {
   50% { transform:scale(1.1); }
 }
 .voice-tip { text-align:center; font-size:18px; color:#888; margin-top:8px; }
-
 .reminder-overlay {
   display:none; position:fixed; top:0; left:0; right:0; bottom:0;
   background:rgba(0,0,0,0.7); z-index:999; justify-content:center;
@@ -215,10 +202,9 @@ body {
 </style>
 </head>
 <body>
-
 <div id="page-home" class="page active">
   <div class="header">
-    <h1>小药叮</h1>
+    <h1>小药叮v1</h1>
     <p>您的贴心用药助手</p>
   </div>
   <div class="card today-card">
@@ -235,7 +221,6 @@ body {
     联用禁忌<span class="sub">多种药一起吃，查有没有冲突</span>
   </button>
 </div>
-
 <div id="page-scan" class="page">
   <div class="top-bar">
     <button class="back-btn" onclick="showPage('home')">← 返回</button>
@@ -252,7 +237,6 @@ body {
   <p class="scan-tip">💡 拍药盒正面即可，系统自动补全用法用量和注意事项</p>
   <div id="scanResult"></div>
 </div>
-
 <div id="page-add" class="page">
   <div class="top-bar">
     <button class="back-btn" onclick="showPage('home')">← 返回</button>
@@ -286,7 +270,6 @@ body {
   </div>
   <button class="btn-big btn-green" onclick="savePlan()">保存提醒</button>
 </div>
-
 <div id="page-interaction" class="page">
   <div class="top-bar">
     <button class="back-btn" onclick="showPage('home')">← 返回</button>
@@ -309,7 +292,6 @@ body {
   <button class="btn-big btn-blue" onclick="checkInteraction()">检查联用禁忌</button>
   <div id="interactionResult"></div>
 </div>
-
 <div id="reminderOverlay" class="reminder-overlay">
   <div class="reminder-box">
     <div class="bell">⏰</div>
@@ -320,16 +302,17 @@ body {
     <button class="btn btn-secondary" onclick="snoozeReminder()" style="margin-top:12px;">10分钟后再提醒</button>
   </div>
 </div>
-
 <script>
+// ============================================================
+// API 配置：密钥已移至服务端代理（见 worker.js），前端不再持有
+// 部署代理后，把 PROXY_URL 改成你的 Worker 地址即可
+// ============================================================
 const AI_CONFIG = {
-  API_KEY: 'fa50168170174c708c0ee1f810abd65d.KLKJq9Tp33HYVemv',
+  PROXY_URL: 'https://xiaoyaodingproxy.stephanie-syx.workers.dev',
   VISION_MODEL: 'glm-4v-plus',
   TEXT_MODEL: 'glm-4-plus',
-  VOICE_MODEL: 'glm-4-air',
-  API_URL: 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+  VOICE_MODEL: 'glm-4-air'
 };
-
 const STORAGE_KEY = 'yinling_plans';
 function loadPlans() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
@@ -344,7 +327,6 @@ function syncPlansToSW() {
     try { navigator.serviceWorker.controller.postMessage({ type:'sync-plans', plans:loadPlans() }); } catch(e) {}
   }
 }
-
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
@@ -357,7 +339,6 @@ function showPage(name) {
   }
   window.scrollTo(0, 0);
 }
-
 function renderToday() {
   const plans = loadPlans();
   const today = new Date().toDateString();
@@ -383,7 +364,6 @@ function renderToday() {
     </div>`;
   }).join('');
 }
-
 // 时间已过的话从明天开始提醒，避免刚设完就弹
 function savePlan() {
   const name = document.getElementById('medName').value.trim();
@@ -409,7 +389,6 @@ function savePlan() {
   alert('保存成功！');
   showPage('home');
 }
-
 function markTaken(id, taken = true) {
   const plans = loadPlans();
   const p = plans.find(x => x.id === id);
@@ -429,7 +408,6 @@ function deletePlan(id) {
   savePlans(loadPlans().filter(p => p.id !== id));
   renderToday();
 }
-
 function handleScan(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -441,15 +419,10 @@ function handleScan(event) {
     preview.src = e.target.result;
     preview.style.display = 'block';
     placeholder.style.display = 'none';
-    if (!AI_CONFIG.API_KEY || AI_CONFIG.API_KEY.indexOf('你的') !== -1) {
-      resultDiv.innerHTML = '<div class="warn-box">尚未配置大模型API密钥。<br><br>请在HTML代码中找到 AI_CONFIG，填入你的 API_KEY 后重新部署。</div>';
-      return;
-    }
     recognizeMedication(e.target.result, resultDiv);
   };
   reader.readAsDataURL(file);
 }
-
 // 模型返回的JSON可能带markdown或多余文字，做容错
 function parseJSONSafe(content) {
   try { return JSON.parse(content); } catch(e) {}
@@ -457,7 +430,6 @@ function parseJSONSafe(content) {
   if (m) { try { return JSON.parse(m[0]); } catch(e) {} }
   return null;
 }
-
 function formatField(text) {
   if (!text) return '';
   if (typeof text !== 'string') {
@@ -465,28 +437,31 @@ function formatField(text) {
   }
   return text;
 }
-
+// 统一通过代理调用大模型，前端不携带任何密钥
+async function callAI(payload) {
+  const res = await fetch(AI_CONFIG.PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error('代理返回错误 ' + res.status + '：' + errText.substring(0, 300));
+  }
+  return res.json();
+}
 async function recognizeMedication(imageData, resultDiv) {
   resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在识别药品并整理用药说明，请稍候...</div>';
   const prompt = '识别这张药品照片，告诉我药名和怎么吃。返回JSON，字段有name(通用名)、brand(商品名)、dose(规格)、indication(适应症)、usage(用法用量)、timing(什么时候吃)、adverse(不良反应)、contraindication(什么人不能吃)、caution(注意事项)、interaction(联用提醒)。只返回JSON别写别的。认不出来name就写"未能识别出药品"。图片上看不清的信息按这个药的常规说明补全就行，用大白话写。';
   try {
-    const res = await fetch(AI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
-      body: JSON.stringify({
-        model: AI_CONFIG.VISION_MODEL,
-        messages: [{ role:'user', content:[
-          { type:'image_url', image_url:{ url:imageData } },
-          { type:'text', text:prompt }
-        ]}],
-        max_tokens: 2048, temperature: 0.3
-      })
+    const data = await callAI({
+      model: AI_CONFIG.VISION_MODEL,
+      messages: [{ role:'user', content:[
+        { type:'image_url', image_url:{ url:imageData } },
+        { type:'text', text:prompt }
+      ]}],
+      max_tokens: 2048, temperature: 0.3
     });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error('API错误 ' + res.status + '：' + errText.substring(0, 300));
-    }
-    const data = await res.json();
     const result = parseJSONSafe(data.choices[0].message.content);
     if (!result || !result.name) {
       resultDiv.innerHTML = '<div class="warn-box">识别结果解析失败。<br><br>模型返回内容：' + data.choices[0].message.content.substring(0, 200) + '</div>';
@@ -503,7 +478,6 @@ async function recognizeMedication(imageData, resultDiv) {
     speak('识别失败，请稍后再试');
   }
 }
-
 let lastRecognizedMed = null;
 function showRecognizeResult(med) {
   lastRecognizedMed = med;
@@ -539,7 +513,6 @@ function showRecognizeResult(med) {
   if (!isFailed) speakResult();
   else speak('未能识别出药品，请重新拍摄');
 }
-
 function speakResult() {
   if (!lastRecognizedMed) return;
   const med = lastRecognizedMed;
@@ -550,7 +523,6 @@ function speakResult() {
   if (med.contraindication) text += '。注意：' + med.contraindication + '禁用';
   speak(text);
 }
-
 async function checkInteraction() {
   let input = document.getElementById('interactionInput').value.trim();
   const resultDiv = document.getElementById('interactionResult');
@@ -559,13 +531,11 @@ async function checkInteraction() {
   resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在分析联用禁忌，请稍候...</div>';
   const prompt = '用户输入：' + input + '\n\n先把里面的药名提取出来，再看看这些药一起吃有没有冲突。返回JSON：extractedDrugs(药名逗号分隔)、hasConflict(true/false)、conflicts(数组，每项pair/risk(高中低)/description)、warnings、suggestion。只返回JSON。warnings和suggestion里要写具体药名别用"这些药"。认不出药名extractedDrugs就留空，只有一种药也说明一下。';
   try {
-    const res = await fetch(AI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
-      body: JSON.stringify({ model: AI_CONFIG.TEXT_MODEL, messages:[{ role:'user', content:prompt }], max_tokens:1200, temperature:0.3 })
+    const data = await callAI({
+      model: AI_CONFIG.TEXT_MODEL,
+      messages:[{ role:'user', content:prompt }],
+      max_tokens:1200, temperature:0.3
     });
-    if (!res.ok) throw new Error('API错误 ' + res.status);
-    const data = await res.json();
     const result = parseJSONSafe(data.choices[0].message.content);
     if (!result) throw new Error('解析失败');
     const drugs = (result.extractedDrugs || '').trim();
@@ -626,7 +596,6 @@ async function checkInteraction() {
     resultDiv.innerHTML = '<div class="warn-box">分析失败：' + e.message + '<br><br>请检查网络是否正常。</div>';
   }
 }
-
 let lastInteractionResult = null;
 function speakInteractionResult() {
   if (!lastInteractionResult) return;
@@ -650,7 +619,6 @@ function speakInteractionResult() {
   if (r.suggestion) text += '建议：' + r.suggestion;
   speak(text);
 }
-
 let interactionRecognition = null;
 let interactionRecording = false;
 let lastInteractionVoiceText = '';
@@ -715,7 +683,6 @@ function stopInteractionVoice() {
   if (!interactionRecording || !interactionRecognition) return;
   try { interactionRecognition.stop(); } catch(e) {}
 }
-
 let currentReminderId = null;
 let reminderTimer = null;
 const originalTitle = '小药叮';
@@ -767,7 +734,6 @@ window.addEventListener('online', function() { checkReminders(); });
 if ('Notification' in window && Notification.permission === 'default') {
   Notification.requestPermission();
 }
-
 const SW_CODE = `
 let medicationPlans = [];
 let checkTimer = null;
@@ -860,7 +826,6 @@ if ('serviceWorker' in navigator) {
     }
   });
 }
-
 function showReminder(plan) {
   currentReminderId = plan.id;
   document.getElementById('reminderName').textContent = plan.name;
@@ -903,7 +868,6 @@ function snoozeReminder() {
   currentReminderId = null;
 }
 scheduleNextCheck();
-
 let audioCtx = null;
 function initAudio() {
   if (!audioCtx) {
@@ -937,7 +901,6 @@ function vibratePhone() {
     try { navigator.vibrate([300, 150, 300, 150, 300, 150, 300]); } catch(e) {}
   }
 }
-
 function speak(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -948,7 +911,6 @@ function speak(text) {
     window.speechSynthesis.speak(utter);
   }
 }
-
 let recognition = null;
 let isRecording = false;
 function initVoiceBtn() {
@@ -1037,19 +999,16 @@ function normalizeDose(dose) {
   for (const k in map) result = result.replace(new RegExp(k, 'g'), map[k]);
   return result;
 }
-
 async function parseVoiceCommand(text) {
   const resultEl = document.getElementById('voiceResult');
   resultEl.textContent = '您说：' + text + '（正在解析...）';
   const prompt = '从这句话里提取用药提醒：' + text + '\n\n严格返回JSON，字段如下：\n- name: 药品名称（必须提取）\n- dose: 剂量/数量，如"1片"、"2粒"、"10mg"、"一片"、"两片"（用户说了数量或剂量就必须提取，不要留空）\n- time: 服用时间，HH:MM格式（早上8点=08:00，中午12点=12:00，下午2点=14:00，晚上8点=20:00）\n- note: 备注，如"饭前"、"饭后"、"睡前"、"随餐"（没有就留空）\n\n只返回JSON，不要其他文字。';
   try {
-    const res = await fetch(AI_CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_CONFIG.API_KEY },
-      body: JSON.stringify({ model: AI_CONFIG.VOICE_MODEL, messages:[{ role:'user', content:prompt }], max_tokens:300, temperature:0.1 })
+    const data = await callAI({
+      model: AI_CONFIG.VOICE_MODEL,
+      messages:[{ role:'user', content:prompt }],
+      max_tokens:300, temperature:0.1
     });
-    if (!res.ok) throw new Error('API错误 ' + res.status);
-    const data = await res.json();
     const result = parseJSONSafe(data.choices[0].message.content);
     if (result) {
       document.getElementById('medName').value = result.name || '';
@@ -1063,7 +1022,6 @@ async function parseVoiceCommand(text) {
     resultEl.textContent = '您说：' + text + '（解析失败：' + e.message + '）';
   }
 }
-
 initInteractionVoice();
 initVoiceBtn();
 renderToday();
