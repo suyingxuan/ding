@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -113,6 +113,17 @@ body {
 .warn-box.yellow { background:#fffbe6; border-left-color:#faad14; }
 .warn-box.blue { background:#f0f5ff; border-left-color:#1890ff; }
 .disclaimer { text-align:center; color:#aaa; font-size:15px; margin-top:12px; }
+.source-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 12px; border-radius:16px;
+  font-size:14px; font-weight:600; margin-top:10px;
+  letter-spacing:0.3px;
+}
+.source-badge.kb { background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f; }
+.source-badge.ai { background:#fffbe6; color:#ad6800; border:1px solid #ffe58f; }
+.source-badge .dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
+.source-badge.kb .dot { background:#52c41a; }
+.source-badge.ai .dot { background:#faad14; }
 .result-actions { text-align:center; margin-top:18px; }
 .voice-card { text-align:center; padding:24px 20px; }
 .voice-card .vc-title { font-size:21px; font-weight:700; color:#333; margin-bottom:6px; }
@@ -2056,7 +2067,7 @@ function renderKBResult(drugList, conflicts, resultDiv) {
   let html = '<div class="result-card">';
   html += '<div class="drug-confirm"><div class="dc-label">分析药品（知识库匹配）</div><div class="dc-value">' + drugs + '</div></div>';
   if (hasConflict) {
-    html += '<div class="section-heading danger">⚠️ 发现联用禁忌（权威数据）</div>';
+    html += '<div class="section-heading danger">⚠️ 发现联用禁忌</div>';
     for (const c of conflicts) {
       const riskClass = c.risk === '高' ? 'high' : (c.risk === '中' ? 'mid' : 'low');
       html += '<div class="conflict-card ' + riskClass + '">' +
@@ -2068,7 +2079,7 @@ function renderKBResult(drugList, conflicts, resultDiv) {
     html += '<div class="safe-card"><div class="sc-title">✅ 未发现已知联用禁忌</div>' +
       '<div class="sc-desc">' + drugs + ' 之间在知识库中未记录有明显相互作用</div></div>';
   }
-  html += '<div class="info-box blue"><div class="ib-title">数据来源</div><div class="ib-content">以上结果来自内置常用药知识库（50种），未覆盖的药品或组合将由AI补充分析。用药请遵医嘱。</div></div>';
+  html += '<div class="source-badge kb"><span class="dot"></span>权威数据 · 来自内置药品知识库</div>';
   html += '<div class="result-actions"><button class="btn btn-secondary" style="font-size:20px;padding:16px 36px;" onclick="speakKBResult()">🔊 重新播报</button></div>';
   html += '</div>';
   resultDiv.innerHTML = html;
@@ -2316,9 +2327,9 @@ function showRecognizeResult(med) {
     }
     html += '<div class="result-actions"><button class="btn btn-secondary" onclick="speakResult()">🔊 重新播报</button></div>';
     if (med._source === 'kb') {
-      html += '<div class="info-box" style="background:#f6ffed;border-left:5px solid #52C41A;margin-top:12px;"><div class="ib-title" style="color:#52C41A;font-size:19px;font-weight:700;">数据来源：内置药品知识库（权威数据）</div><div class="ib-content" style="font-size:18px;color:#333;">该药品信息已匹配内置常用药知识库，用法用量、禁忌、不良反应等来自药品说明书整理。具体用药请遵医嘱。</div></div>';
+      html += '<div class="source-badge kb"><span class="dot"></span>权威数据 · 来自内置药品知识库</div>';
     } else {
-      html += '<div class="warn-box yellow" style="margin-top:12px;"><strong>⚠️ AI生成内容，仅供参考</strong><br>该药品未在内置知识库中收录，以上信息由AI根据药盒识别生成，可能存在不准确或遗漏，请务必核对药品说明书或咨询医生/药师后再使用。</div>';
+      html += '<div class="source-badge ai"><span class="dot"></span>AI生成 · 仅供参考，请遵医嘱</div>';
     }
   } else {
     html += '<div class="warn-box">未能识别出药品信息。<br><br>请确保照片清晰、药盒文字完整可见，然后重新拍摄。</div>';
@@ -2415,7 +2426,7 @@ async function checkInteraction() {
     if (result.suggestion) {
       html += '<div class="info-box yellow"><div class="ib-title">建议</div><div class="ib-content">' + result.suggestion + '</div></div>';
     }
-    html += '<div class="warn-box yellow" style="margin-top:12px;"><strong>⚠️ AI分析结果，仅供参考</strong><br>以上联用禁忌分析由AI大模型生成，可能存在不准确或遗漏。涉及具体用药调整，请务必咨询医生或药师。</div>';
+    html += '<div class="source-badge ai"><span class="dot"></span>AI生成 · 仅供参考，请遵医嘱</div>';
     html += '<div class="result-actions"><button class="btn btn-secondary" style="font-size:20px;padding:16px 36px;" onclick="speakInteractionResult()">🔊 重新播报</button></div>';
     html += '</div>';
     resultDiv.innerHTML = html;
