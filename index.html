@@ -124,6 +124,17 @@ body {
 .source-badge .dot { width:6px; height:6px; border-radius:50%; display:inline-block; }
 .source-badge.kb .dot { background:#52c41a; }
 .source-badge.ai .dot { background:#faad14; }
+.drug-list-card { display:none; }
+.drug-list-container { display:flex; flex-wrap:wrap; gap:8px; min-height:40px; }
+.drug-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 16px; background:#f0f5ff; border:1px solid #91caff;
+  border-radius:20px; font-size:20px; font-weight:600; color:#1890ff; margin:4px;
+}
+.drug-tag .remove { cursor:pointer; font-size:18px; color:#ff4d4f; font-weight:700; line-height:1; }
+.drug-tag .remove:active { opacity:0.6; }
+#analyzeBtn { display:none; }
+.interaction-tip { display:none; margin-bottom:16px; }
 .result-actions { text-align:center; margin-top:18px; }
 .voice-card { text-align:center; padding:24px 20px; }
 .voice-card .vc-title { font-size:21px; font-weight:700; color:#333; margin-bottom:6px; }
@@ -254,32 +265,18 @@ body {
     <span class="title">设提醒</span>
   </div>
   <div class="card voice-card">
-    <div class="vc-title">🎤 语音填写</div>
-    <p class="vc-desc">按住按钮说话，自动填好药品信息</p>
+    <div class="vc-title">🎤 语音说用药</div>
+    <p class="vc-desc">按住按钮，说出药品、剂量和时间</p>
     <p class="vc-example">例如：每天早上八点吃阿司匹林一片</p>
     <button class="voice-btn lg" id="voiceBtn">按住<br>说话</button>
     <p id="voiceResult" class="vc-result"></p>
   </div>
-  <div class="card">
-    <div class="card-title">📝 确认信息</div>
-    <div class="form-group">
-      <label>药品</label>
-      <input type="text" id="medName" placeholder="例如：阿司匹林">
-    </div>
-    <div class="form-group">
-      <label>剂量</label>
-      <input type="text" id="medDose" placeholder="例如：1片">
-    </div>
-    <div class="form-group">
-      <label>时间</label>
-      <div class="time-row"><input type="time" id="medTime" value="08:00"></div>
-    </div>
-    <div class="form-group">
-      <label>备注（可选）</label>
-      <input type="text" id="medNote" placeholder="例如：饭后服用">
-    </div>
+  <div class="card" id="parsedCard" style="display:none;">
+    <div class="card-title">📋 识别结果</div>
+    <div id="parsedContent"></div>
   </div>
-  <button class="btn-big btn-green" onclick="savePlan()">保存提醒</button>
+  <div id="addTip" class="interaction-tip"></div>
+  <button class="btn-big btn-green" id="saveReminderBtn" style="display:none;" onclick="savePlan()">保存提醒</button>
 </div>
 <div id="page-interaction" class="page">
   <div class="top-bar">
@@ -287,20 +284,18 @@ body {
     <span class="title">联用禁忌</span>
   </div>
   <div class="card voice-card">
-    <div class="vc-title">🎤 语音提问</div>
-    <p class="vc-desc">按住按钮说话，直接问就行</p>
-    <p class="vc-example">例如：阿司匹林和布洛芬可以一起吃吗</p>
+    <div class="vc-title">🎤 语音说药名</div>
+    <p class="vc-desc">按住按钮，说出要检查的几种药</p>
+    <p class="vc-example">例如：阿司匹林和布洛芬</p>
     <button class="voice-btn lg" id="interactionVoiceBtn">按住<br>说话</button>
     <p id="interactionVoiceResult" class="vc-result"></p>
   </div>
-  <div class="card">
-    <div class="card-title">📝 或手动输入</div>
-    <div class="form-group">
-      <label>药品名称（逗号隔开）或直接提问</label>
-      <textarea id="interactionInput" rows="3" placeholder=""></textarea>
-    </div>
+  <div class="card drug-list-card" id="drugListCard">
+    <div class="card-title">💊 待分析药品</div>
+    <div class="drug-list-container" id="drugListContainer"></div>
   </div>
-  <button class="btn-big btn-blue" onclick="checkInteraction()">检查联用禁忌</button>
+  <div id="interactionTip" class="interaction-tip"></div>
+  <button class="btn-big btn-blue" id="analyzeBtn" onclick="analyzeInteraction()">开始分析</button>
   <div id="interactionResult"></div>
 </div>
 <div id="reminderOverlay" class="reminder-overlay">
@@ -2149,10 +2144,20 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   if (name === 'home') renderToday();
   if (name === 'interaction') {
-    document.getElementById('interactionInput').value = '';
     document.getElementById('interactionResult').innerHTML = '';
     document.getElementById('interactionVoiceResult').textContent = '';
     lastInteractionVoiceText = '';
+    selectedDrugs = [];
+    renderDrugList();
+    document.getElementById('interactionTip').style.display = 'none';
+    document.getElementById('analyzeBtn').style.display = 'none';
+  }
+  if (name === 'add') {
+    parsedReminder = null;
+    document.getElementById('parsedCard').style.display = 'none';
+    document.getElementById('addTip').style.display = 'none';
+    document.getElementById('saveReminderBtn').style.display = 'none';
+    document.getElementById('voiceResult').textContent = '';
   }
   window.scrollTo(0, 0);
 }
@@ -2183,12 +2188,13 @@ function renderToday() {
 }
 // 时间已过的话从明天开始提醒，避免刚设完就弹
 function savePlan() {
-  const name = document.getElementById('medName').value.trim();
-  const dose = normalizeDose(document.getElementById('medDose').value.trim());
-  const time = document.getElementById('medTime').value;
-  const note = document.getElementById('medNote').value.trim();
-  if (!name) { alert('请填写药品名称'); return; }
-  if (!time) { alert('请选择服用时间'); return; }
+  if (!parsedReminder || !parsedReminder.name || !parsedReminder.time) {
+    alert('请先语音识别出有效的药品和时间'); return;
+  }
+  const name = parsedReminder.name.trim();
+  const dose = normalizeDose(parsedReminder.dose || '');
+  const time = parsedReminder.time;
+  const note = (parsedReminder.note || '').trim();
   const plans = loadPlans();
   const now = new Date();
   const parts = time.split(':');
@@ -2200,9 +2206,7 @@ function savePlan() {
   if (planTime <= now) newPlan.lastReminded = now.toDateString();
   plans.push(newPlan);
   savePlans(plans);
-  document.getElementById('medName').value = '';
-  document.getElementById('medDose').value = '';
-  document.getElementById('medNote').value = '';
+  parsedReminder = null;
   alert('保存成功！');
   showPage('home');
 }
@@ -2255,17 +2259,27 @@ function formatField(text) {
   return text;
 }
 // 统一通过代理调用大模型，前端不携带任何密钥
-async function callAI(payload) {
-  const res = await fetch(AI_CONFIG.PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error('代理返回错误 ' + res.status + '：' + errText.substring(0, 300));
+async function callAI(payload, retries = 1) {
+  try {
+    const res = await fetch(AI_CONFIG.PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('代理返回错误 ' + res.status + '：' + errText.substring(0, 300));
+    }
+    return res.json();
+  } catch (err) {
+    // 网络错误（冷启动/超时/连接重置）自动重试
+    if (retries > 0 && (err.name === 'TypeError' || err.message.includes('load') || err.message.includes('fetch') || err.message.includes('Network'))) {
+      console.warn('AI调用网络错误，自动重试：', err.message);
+      await new Promise(r => setTimeout(r, 1500));
+      return callAI(payload, retries - 1);
+    }
+    throw err;
   }
-  return res.json();
 }
 async function recognizeMedication(imageData, resultDiv) {
   resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在识别药品并整理用药说明，请稍候...</div>';
@@ -2342,10 +2356,9 @@ function speakResult() {
   speak(text);
 }
 async function checkInteraction() {
-  let input = document.getElementById('interactionInput').value.trim();
+  let input = lastInteractionVoiceText.trim();
   const resultDiv = document.getElementById('interactionResult');
-  if (!input && lastInteractionVoiceText) input = lastInteractionVoiceText.trim();
-  if (!input) { alert('请输入药品名称或按住说话'); return; }
+  if (!input) { alert('请先按住说话，说出药品名称'); return; }
 
   // ===== 第一步：前端知识库快速匹配 =====
   const matchedDrugs = matchDrugsInText(input);
@@ -2392,7 +2405,7 @@ async function checkInteraction() {
       speak('只识别到' + drugs + '一种药，联用禁忌分析需要至少两种药品，请补充其他药品名称');
       return;
     }
-    document.getElementById('interactionInput').value = drugs;
+    // 药品列表已由前端管理，无需回填
     const sortedConflicts = (result.conflicts || []).slice().sort((a, b) => {
       const order = { '高':0, '中':1, '低':2 };
       return (order[a.risk] || 3) - (order[b.risk] || 3);
@@ -2455,6 +2468,8 @@ function speakInteractionResult() {
 let interactionRecognition = null;
 let interactionRecording = false;
 let lastInteractionVoiceText = '';
+let selectedDrugs = [];
+let parsedReminder = null;
 function initInteractionVoice() {
   const btn = document.getElementById('interactionVoiceBtn');
   if (!btn) return;
@@ -2481,7 +2496,6 @@ function startInteractionVoice() {
     btn.classList.add('recording');
     btn.innerHTML = '正在<br>听...';
     resultEl.textContent = '请说话...';
-    document.getElementById('interactionInput').value = '';
     document.getElementById('interactionResult').innerHTML = '';
     lastInteractionVoiceText = '';
   };
@@ -2492,7 +2506,6 @@ function startInteractionVoice() {
     if (text) {
       resultEl.textContent = '您说：' + text;
       lastInteractionVoiceText = text;
-      document.getElementById('interactionInput').value = text;
     }
   };
   interactionRecognition.onerror = function(event) {
@@ -2509,12 +2522,84 @@ function startInteractionVoice() {
     interactionRecording = false;
     btn.classList.remove('recording');
     btn.innerHTML = '按住<br>说话';
+    if (lastInteractionVoiceText) matchDrugsAndShow();
   };
   try { interactionRecognition.start(); } catch(e) {}
 }
 function stopInteractionVoice() {
   if (!interactionRecording || !interactionRecognition) return;
   try { interactionRecognition.stop(); } catch(e) {}
+}
+
+// 语音识别后匹配药名并显示列表
+function matchDrugsAndShow() {
+  if (!lastInteractionVoiceText) return;
+  const matched = matchDrugsInText(lastInteractionVoiceText);
+  // 合并到已选列表，去重
+  for (const drug of matched) {
+    if (!selectedDrugs.includes(drug)) selectedDrugs.push(drug);
+  }
+  renderDrugList();
+  const tipEl = document.getElementById('interactionTip');
+  const btn = document.getElementById('analyzeBtn');
+  if (selectedDrugs.length >= 2) {
+    tipEl.style.display = 'none';
+    btn.style.display = 'block';
+  } else if (selectedDrugs.length === 1) {
+    tipEl.innerHTML = '<div class="warn-box yellow">已识别到 <strong>' + selectedDrugs[0] + '</strong>，联用禁忌分析需要至少两种药品，请继续说话补充其他药品。</div>';
+    tipEl.style.display = 'block';
+    btn.style.display = 'none';
+  } else {
+    tipEl.innerHTML = '<div class="warn-box">未识别到常用药品。请重新说话，例如："阿司匹林和布洛芬"。目前内置50种常用药，以降压、降糖、降脂、抗凝、胃药、感冒药为主。</div>';
+    tipEl.style.display = 'block';
+    btn.style.display = 'none';
+  }
+}
+
+// 渲染药品标签列表
+function renderDrugList() {
+  const card = document.getElementById('drugListCard');
+  const container = document.getElementById('drugListContainer');
+  if (selectedDrugs.length === 0) {
+    card.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  card.style.display = 'block';
+  container.innerHTML = selectedDrugs.map((name, idx) =>
+    '<span class="drug-tag">' + name +
+    '<span class="remove" onclick="removeDrug(' + idx + ')">×</span></span>'
+  ).join('');
+}
+
+// 删除某个药品
+function removeDrug(idx) {
+  selectedDrugs.splice(idx, 1);
+  renderDrugList();
+  const tipEl = document.getElementById('interactionTip');
+  const btn = document.getElementById('analyzeBtn');
+  if (selectedDrugs.length >= 2) {
+    tipEl.style.display = 'none';
+    btn.style.display = 'block';
+  } else if (selectedDrugs.length === 1) {
+    tipEl.innerHTML = '<div class="warn-box yellow">已识别到 <strong>' + selectedDrugs[0] + '</strong>，联用禁忌分析需要至少两种药品，请继续说话补充其他药品。</div>';
+    tipEl.style.display = 'block';
+    btn.style.display = 'none';
+  } else {
+    tipEl.style.display = 'none';
+    btn.style.display = 'none';
+  }
+}
+
+// 开始联用禁忌分析（知识库检索）
+function analyzeInteraction() {
+  if (selectedDrugs.length < 2) return;
+  const resultDiv = document.getElementById('interactionResult');
+  resultDiv.innerHTML = '<div class="loading"><span class="spin"></span>正在检索知识库...</div>';
+  setTimeout(() => {
+    const conflicts = findAllInteractions(selectedDrugs);
+    renderKBResult(selectedDrugs, conflicts, resultDiv);
+  }, 300);
 }
 let currentReminderId = null;
 let reminderTimer = null;
@@ -2843,17 +2928,56 @@ async function parseVoiceCommand(text) {
       max_tokens:300, temperature:0.1
     });
     const result = parseJSONSafe(data.choices[0].message.content);
-    if (result) {
-      document.getElementById('medName').value = result.name || '';
-      document.getElementById('medDose').value = normalizeDose(result.dose);
-      document.getElementById('medTime').value = result.time || '';
-      document.getElementById('medNote').value = result.note || '';
+    if (result && result.name && result.time) {
+      parsedReminder = {
+        name: result.name,
+        dose: normalizeDose(result.dose),
+        time: result.time,
+        note: result.note || ''
+      };
+      renderParsedReminder();
       resultEl.textContent = '您说：' + text + '（已解析）';
+    } else {
+      parsedReminder = null;
+      document.getElementById('parsedCard').style.display = 'none';
+      document.getElementById('saveReminderBtn').style.display = 'none';
+      const tipEl = document.getElementById('addTip');
+      const missing = [];
+      if (!result || !result.name) missing.push('药品名称');
+      if (!result || !result.time) missing.push('服用时间');
+      tipEl.innerHTML = '<div class="warn-box yellow">未识别出完整的用药信息（缺少：' + missing.join('、') + '）。请重新说话，例如："每天早上八点吃阿司匹林一片"。</div>';
+      tipEl.style.display = 'block';
+      resultEl.textContent = '您说：' + text + '（信息不完整）';
     }
   } catch (e) {
     console.warn('大模型解析失败:', e);
-    resultEl.textContent = '您说：' + text + '（解析失败：' + e.message + '）';
+    parsedReminder = null;
+    document.getElementById('parsedCard').style.display = 'none';
+    document.getElementById('saveReminderBtn').style.display = 'none';
+    const tipEl = document.getElementById('addTip');
+    tipEl.innerHTML = '<div class="warn-box">解析失败：' + e.message + '<br><br>请检查网络是否正常，或重新说话。</div>';
+    tipEl.style.display = 'block';
+    resultEl.textContent = '您说：' + text + '（解析失败）';
   }
+}
+
+// 渲染解析出的用药提醒
+function renderParsedReminder() {
+  if (!parsedReminder) return;
+  const card = document.getElementById('parsedCard');
+  const content = document.getElementById('parsedContent');
+  const tipEl = document.getElementById('addTip');
+  tipEl.style.display = 'none';
+  let html = '';
+  html += '<div class="result-row" style="border-bottom:1px solid #eee;"><span class="result-label">药品：</span>' + parsedReminder.name + '</div>';
+  html += '<div class="result-row" style="border-bottom:1px solid #eee;"><span class="result-label">剂量：</span>' + (parsedReminder.dose || '未指定') + '</div>';
+  html += '<div class="result-row" style="border-bottom:1px solid #eee;"><span class="result-label">时间：</span>' + parsedReminder.time + '</div>';
+  if (parsedReminder.note) {
+    html += '<div class="result-row"><span class="result-label">备注：</span>' + parsedReminder.note + '</div>';
+  }
+  content.innerHTML = html;
+  card.style.display = 'block';
+  document.getElementById('saveReminderBtn').style.display = 'block';
 }
 initInteractionVoice();
 initVoiceBtn();
