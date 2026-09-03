@@ -2126,11 +2126,6 @@ function enrichMedicationWithKB(med) {
     _source: 'kb',
     _kbName: kbDrug.name
   };
-  // 知识库的interactions转成AI的interaction文本
-  if (kbDrug.interactions && kbDrug.interactions.length > 0) {
-    const top = kbDrug.interactions.slice(0, 3);
-    enriched.interaction = top.map(i => i.drug + '（' + i.risk + '风险）：' + i.desc).join('；');
-  }
   return enriched;
 }
 
@@ -2322,9 +2317,6 @@ function showRecognizeResult(med) {
     if (med.contraindication) html += '<div class="warn-box red"><strong>⚠️ 禁忌人群：</strong><br>' + formatField(med.contraindication) + '</div>';
     if (med.adverse) html += '<div class="warn-box yellow"><strong>常见不良反应：</strong><br>' + formatField(med.adverse) + '</div>';
     if (med.caution) html += '<div class="warn-box"><strong>注意事项：</strong><br>' + formatField(med.caution) + '</div>';
-    if (med.interaction && med.interaction.indexOf('无特殊') === -1) {
-      html += '<div class="warn-box blue"><strong>联用提醒：</strong><br>' + formatField(med.interaction) + '</div>';
-    }
     html += '<div class="result-actions"><button class="btn btn-secondary" onclick="speakResult()">🔊 重新播报</button></div>';
     if (med._source === 'kb') {
       html += '<div class="source-badge kb"><span class="dot"></span>权威数据 · 来自内置药品知识库</div>';
